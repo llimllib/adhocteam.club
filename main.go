@@ -58,8 +58,10 @@ func internalError(ws *websocket.Conn, msg string, err error) {
 var upgrader = websocket.Upgrader{}
 
 var commands = make(chan string)
+var clients []*websocket.Conn
 
 func serveWs(w http.ResponseWriter, r *http.Request) {
+	log.Println("opening ws")
 	ws, err := upgrader.Upgrade(w, r, nil)
 	if err != nil {
 		log.Println("upgrade:", err)
@@ -68,17 +70,26 @@ func serveWs(w http.ResponseWriter, r *http.Request) {
 
 	defer ws.Close()
 
+	clients = append(clients, ws)
+
 	for {
 		cmd := <-commands
-		log.Printf("got cmd %s", cmd)
-		ws.SetWriteDeadline(time.Now().Add(writeWait))
-		log.Printf("writing %s", cmd)
-		if err := ws.WriteMessage(websocket.TextMessage, []byte(cmd)); err != nil {
-			log.Printf("error writing %s", err)
-			ws.Close()
-			break
+		for i, client := range clients {
+			log.Printf("got cmd %s", cmd)
+			client.SetWriteDeadline(time.Now().Add(writeWait))
+			log.Printf("writing %s", cmd)
+			err := client.WriteMessage(websocket.TextMessage, []byte(cmd))
+			if err != nil {
+				log.Printf("error writing %s", err)
+				// remove the client
+				clients = append(clients[:i], clients[i+1:]...)
+				client.Close()
+				break
+			}
 		}
 	}
+
+	log.Println("closing ws")
 }
 
 func serveHome(w http.ResponseWriter, r *http.Request) {
@@ -109,6 +120,7 @@ func serveCommand(w http.ResponseWriter, r *http.Request) {
 }
 
 func main() {
+	log.Println("heyo")
 	http.HandleFunc("/", serveHome)
 	http.HandleFunc("/command", serveCommand)
 	http.HandleFunc("/ws", serveWs)
