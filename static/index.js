@@ -2,6 +2,8 @@ function tokenize(cmd) {
   return cmd
     .replace(new RegExp(/\(/, "g"), " ( ")
     .replace(new RegExp(/\)/, "g"), " ) ")
+    .replace(new RegExp(/'/, "g"), " ' ")
+    .replace(new RegExp(/"/, "g"), ' " ')
     .split(" ")
     .filter(x => x.length > 0);
 }
@@ -29,6 +31,20 @@ function readTokens(tokens) {
     return L;
   } else if (")" == tok) {
     throw new Error("syntax exception");
+  } else if ("'" == tok) {
+    const string = [];
+    while (tokens[0] != "'") {
+      string.push(tokens.shift());
+    }
+    tokens.shift();
+    return string.join(" ");
+  } else if ('"' == tok) {
+    const string = [];
+    while (tokens[0] != '"') {
+      string.push(tokens.shift());
+    }
+    tokens.shift();
+    return string.join(" ");
   } else {
     return atom(tok);
   }
@@ -72,6 +88,7 @@ document.addEventListener("DOMContentLoaded", function(event) {
     },
     drawImage: (imgPromise, x, y) =>
       imgPromise.then(img => ctx.drawImage(img, x, y)),
+    font: font => ctx.font = font,
     // We have to use the arrow function to get a proper "this", otherwise
     // we get an invalid context error
     fillText: (text, x, y) => ctx.fillText(text, x, y)
@@ -82,7 +99,9 @@ document.addEventListener("DOMContentLoaded", function(event) {
   c = ca.getContext("2d");
   e = env;
 
-  // TODO: test cross-domain URLs
-  ex("(drawImage (imgDom test.jpg) 10 10)", env);
-  ex("(fillText bananas 10 10)", env);
+  // TODO: * test cross-domain URLs
+  //       * possibly just accept a src to drawImage?
+  ex("(drawImage (imgDom adhoc.png) 10 100)", env);
+  ex("(font '48px serif')", env);
+  ex("(fillText 'bananas are a fine fruit' 10 50)", env);
 });
