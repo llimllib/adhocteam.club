@@ -61,7 +61,7 @@ function eval_(expr, env) {
   } else {
     const proc = eval_(expr[0], env);
     const args = expr.slice(1).map(e => eval_(e, env));
-    console.log(proc, args);
+    //console.log(proc, args);
     return proc(...args);
   }
 }
@@ -70,20 +70,52 @@ function ex(code, env) {
   return eval_(parse(code), env);
 }
 
+function q(code, env) {
+  commands[+new Date()] = () => ex(code, env);
+  console.log(commands);
+}
+
+const commands = {}, blurDuration = 10;
+
+function loop(env, ctx) {
+  ctx.clearRect(0, 0, 1024, 768);
+  const t = +new Date();
+  Object.keys(commands).forEach(k => {
+    const s = (t - k) / 1000;
+    if (s > blurDuration) {
+      delete commands[k];
+      return;
+    }
+    ctx.globalAlpha = (blurDuration - s) / blurDuration;
+    commands[k]();
+  });
+}
+
 document.addEventListener("DOMContentLoaded", function(event) {
-  const canvas = document.getElementById("wall"), ctx = canvas.getContext("2d");
+  const canvas = document.getElementById("wall"),
+    ctx = canvas.getContext("2d"),
+    images = {};
 
   const env = {
     "+": (x, y) => x + y,
     "-": (x, y) => x - y,
     "*": (x, y) => x * y,
     "/": (x, y) => x / y,
+    "%": (x, y) => x % y,
+    ";": () => null,
+    t: () => +new Date(),
     pi: Math.PI,
     cos: Math.cos,
     sin: Math.sin,
+    width: () => 1024,
+    height: () => 768,
     imgDom: src => {
+      if (images.hasOwnProperty(src)) {
+        return new Promise((resolve, reject) => resolve(images[src]));
+      }
       img = document.createElement("img");
       img.src = src;
+      images[src] = img;
       return new Promise((resolve, reject) => img.onload = () => resolve(img));
     },
     drawImage: (imgPromise, x, y) =>
@@ -91,8 +123,13 @@ document.addEventListener("DOMContentLoaded", function(event) {
     font: font => ctx.font = font,
     // We have to use the arrow function to get a proper "this", otherwise
     // we get an invalid context error
-    fillText: (text, x, y) => ctx.fillText(text, x, y)
+    fillText: (text, x, y) => ctx.fillText(text, x, y),
+    log: s => console.log(s)
   };
+
+  // Start the main loop. 60 FPS if each loop takes no time, we probably
+  // don't need anything fancier?
+  setInterval(() => loop(env, ctx), 1000 / 60);
 
   /// XXX DELETEME debugggin globals
   ca = document.getElementById("wall");
@@ -101,7 +138,9 @@ document.addEventListener("DOMContentLoaded", function(event) {
 
   // TODO: * test cross-domain URLs
   //       * possibly just accept a src to drawImage?
-  ex("(drawImage (imgDom adhoc.png) 10 100)", env);
-  ex("(font '48px serif')", env);
-  ex("(fillText 'bananas are a fine fruit' 10 50)", env);
+  q("(drawImage (imgDom adhoc.png) 10 100)", env);
+  q(
+    "(; (font '48px serif') (fillText 'bananas are a fine fruit' (% (/ (t) 10) (width)) 50)) (log (t))",
+    env
+  ), 5000;
 });
