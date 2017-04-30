@@ -71,23 +71,25 @@ function ex(code, env) {
 }
 
 function q(code, env) {
-  commands[+new Date()] = () => ex(code, env);
-  console.log(commands);
+  commands.push([+new Date(), () => ex(code, env)]);
 }
 
-const commands = {}, blurDuration = 10;
+const commands = [], blurDuration = 10;
 
 function loop(env, ctx) {
   ctx.clearRect(0, 0, 1024, 768);
   const t = +new Date();
-  Object.keys(commands).forEach(k => {
+  commands.forEach(([k, cmd], idx) => {
     const s = (t - k) / 1000;
+
+    // remove a command after blurDuration seconds
     if (s > blurDuration) {
-      delete commands[k];
+      commands.splice(idx, 1);
       return;
     }
+
     ctx.globalAlpha = (blurDuration - s) / blurDuration;
-    commands[k]();
+    cmd();
   });
 }
 
@@ -137,6 +139,13 @@ document.addEventListener("DOMContentLoaded", function(event) {
       ctx.globalCompositeOperation = "difference";
       ctx.fillStyle = "white";
       ctx.fillRect(0, 0, width, height);
+    },
+
+    // Animation
+    // 1 is slow, 10 is fast
+    spinRight: s => {
+      speed = -111 * s + 1111;
+      return +new Date() / speed % width;
     }
   };
 
@@ -153,7 +162,7 @@ document.addEventListener("DOMContentLoaded", function(event) {
   //       * possibly just accept a src to drawImage?
   q("(drawImage (imgDom adhoc.png) 10 100)", env);
   q(
-    "(; (font '48px serif') (fillText 'bananas are a fine fruit' (% (/ (t) 10) (width)) 50)))",
+    "(; (font '48px serif') (fillText 'bananas are a fine fruit' (spinRight 5) 50)))",
     env
   );
   q("(invert)", env);
