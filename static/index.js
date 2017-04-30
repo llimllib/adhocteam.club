@@ -98,7 +98,14 @@ document.addEventListener("DOMContentLoaded", function(event) {
     ctx = canvas.getContext("2d"),
     images = {},
     width = 1024,
-    height = 768;
+    height = 768,
+    speed = {
+      1: 100,
+      2: 50,
+      3: 10,
+      4: 3,
+      5: 1
+    };
 
   const env = {
     "+": (x, y) => x + y,
@@ -139,6 +146,21 @@ document.addEventListener("DOMContentLoaded", function(event) {
       ctx.globalCompositeOperation = "difference";
       ctx.fillStyle = "white";
       ctx.fillRect(0, 0, width, height);
+    },
+
+    // Animation
+    // 1 is slow, 5 is fast
+    spinRight: s => {
+      return +new Date() / speed[s] % width;
+    },
+    spinLeft: s => {
+      return width - +new Date() / speed[s] % width;
+    },
+    spinDown: s => {
+      return +new Date() / speed[s] % height;
+    },
+    spinUp: s => {
+      return height - +new Date() / speed[s] % height;
     }
   };
 
@@ -155,7 +177,7 @@ document.addEventListener("DOMContentLoaded", function(event) {
   //       * possibly just accept a src to drawImage?
   q("(drawImage (imgDom adhoc.png) 10 100)", env);
   q(
-    "(; (font '48px serif') (fillText 'bananas are a fine fruit' (% (/ (t) 10) (width)) 50)))",
+    "(; (font '48px serif') (fillText 'bananas are a fine fruit' (spinLeft 3) (spinUp 3))))",
     env
   );
   q("(invert)", env);
