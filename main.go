@@ -115,6 +115,8 @@ func serveCommand(w http.ResponseWriter, r *http.Request) {
 	}
 
 	cmd := string(buf[:num])
+	w.Write([]byte("OK"))
+
 	log.Printf("read command %s", cmd)
 	commands <- cmd
 }
