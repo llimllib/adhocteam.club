@@ -214,4 +214,16 @@ document.addEventListener("DOMContentLoaded", function(event) {
     "(; (translate 300 300) (font '48px sans-serif') (rotateRight (% (/ (t) 10) 365)) (fillText 'whoa dude' 0 0))",
     env()
   );
+
+  const conn = new WebSocket("ws://" + document.location.host + "/ws");
+  conn.onclose = function(evt) {
+    console.log("closing");
+  };
+  conn.onmessage = function(evt) {
+    console.log("got evt", evt);
+    q(evt.data, env());
+  };
+  conn.onerror = function(err) {
+    console.error("ERROR: ", err);
+  };
 });
