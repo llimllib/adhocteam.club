@@ -192,7 +192,7 @@ document.addEventListener("DOMContentLoaded", function(event) {
 
   // TODO: * test cross-domain URLs
   //       * possibly just accept a src to drawImage?
-  q("(drawImage (imgDom adhoc.png) 10 100)", env());
+  q("(drawImage (imgDom /static/adhoc.png) 10 100)", env());
   q(
     "(drawImage (imgDom https://billmill.org/images/logo.png) (spinLeft 2) 100)",
     env()

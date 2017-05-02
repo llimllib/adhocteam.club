@@ -92,13 +92,22 @@ func serveWs(w http.ResponseWriter, r *http.Request) {
 	log.Println("closing ws")
 }
 
+func serveStatic(w http.ResponseWriter, r *http.Request) {
+	if r.Method != "GET" {
+		http.Error(w, "Method not allowed", 405)
+		return
+	}
+	log.Printf("%s", r.URL.Path)
+	http.ServeFile(w, r, fmt.Sprintf(".%s", r.URL.Path))
+}
+
 func serveHome(w http.ResponseWriter, r *http.Request) {
 	if r.Method != "GET" {
 		http.Error(w, "Method not allowed", 405)
 		return
 	}
-	log.Printf("static%s", r.URL.Path)
-	http.ServeFile(w, r, fmt.Sprintf("static%s", r.URL.Path))
+	log.Printf("%s", r.URL.Path)
+	http.ServeFile(w, r, "static/index.html")
 }
 
 func serveCommand(w http.ResponseWriter, r *http.Request) {
@@ -123,8 +132,9 @@ func serveCommand(w http.ResponseWriter, r *http.Request) {
 
 func main() {
 	log.Println("heyo")
-	http.HandleFunc("/", serveHome)
+	http.HandleFunc("/static/", serveStatic)
 	http.HandleFunc("/command", serveCommand)
 	http.HandleFunc("/ws", serveWs)
+	http.HandleFunc("/", serveHome)
 	log.Fatal(http.ListenAndServe(*addr, nil))
 }
