@@ -140,11 +140,7 @@ document.addEventListener("DOMContentLoaded", function(event) {
           const img = document.createElement("img");
           img.src = src;
           images[src] = undefined;
-          img.onload = () => {
-            console.log(img);
-            images[src] = img;
-          };
-          console.log(images, src, img);
+          img.onload = () => images[src] = img;
         }
       },
 
