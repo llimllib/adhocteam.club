@@ -84,7 +84,6 @@ func serveWs(w http.ResponseWriter, r *http.Request) {
 				// remove the client
 				clients = append(clients[:i], clients[i+1:]...)
 				client.Close()
-				break
 			}
 		}
 	}

@@ -91,7 +91,13 @@ function loop(env, ctx) {
 
     ctx.globalAlpha = (blurDuration - s) / blurDuration;
     ctx.save();
-    cmd();
+    try {
+      cmd();
+    } catch (e) {
+      console.error("got error", e, "when executing cmd", cmd, "removing it");
+      commands.splice(idx, 1);
+    }
+
     ctx.restore();
   });
 }
@@ -124,19 +130,24 @@ document.addEventListener("DOMContentLoaded", function(event) {
       sin: Math.sin,
       width: () => width,
       height: () => height,
-      imgDom: src => {
+      drawImage: (src, x, y) => {
         if (images.hasOwnProperty(src)) {
-          return new Promise((resolve, reject) => resolve(images[src]));
+          // the image is undefined until it gets onload-ed
+          if (images[src] !== undefined) {
+            ctx.drawImage(images[src], x, y);
+          }
+        } else {
+          const img = document.createElement("img");
+          img.src = src;
+          images[src] = undefined;
+          img.onload = () => {
+            console.log(img);
+            images[src] = img;
+          };
+          console.log(images, src, img);
         }
-        img = document.createElement("img");
-        img.src = src;
-        images[src] = img;
-        return new Promise(
-          (resolve, reject) => img.onload = () => resolve(img)
-        );
       },
-      drawImage: (imgPromise, x, y) =>
-        imgPromise.then(img => ctx.drawImage(img, x, y)),
+
       font: font => ctx.font = font,
       // We have to use the arrow function to get a proper "this", otherwise
       // we get an invalid context error
@@ -192,16 +203,12 @@ document.addEventListener("DOMContentLoaded", function(event) {
 
   // TODO: * test cross-domain URLs
   //       * possibly just accept a src to drawImage?
-  q("(drawImage (imgDom /static/adhoc.png) 10 100)", env());
-  q(
-    "(drawImage (imgDom https://billmill.org/images/logo.png) (spinLeft 2) 100)",
-    env()
-  );
+  q("(drawImage /static/adhoc.png 10 100)", env());
+  q("(drawImage https://billmill.org/images/logo.png (spinLeft 2) 100)", env());
   q(
     "(; (font '48px serif') (fillText 'bananas are a fine fruit' (spinLeft 3) (spinUp 3))))",
     env()
   );
-  q("(invert)", env());
   q(
     `(;
     (fillRect 0 0 100 100) (fillRect 200 0 100 100) (fillRect 400 0 100 100) (fillRect 600 0 100 100)
@@ -215,7 +222,10 @@ document.addEventListener("DOMContentLoaded", function(event) {
     env()
   );
 
-  const conn = new WebSocket("ws://" + document.location.host + "/ws");
+  const proto = document.location.protocol.match(/(.):/)[1] == "s"
+    ? "wss"
+    : "ws",
+    conn = new WebSocket(`${proto}://${document.location.host}/ws`);
   conn.onclose = function(evt) {
     console.log("closing");
   };
