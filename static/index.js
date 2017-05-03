@@ -31,7 +31,11 @@ function readTokens(tokens) {
   if ("(" == tok) {
     const L = [];
     while (tokens[0] != ")") {
-      L.push(readTokens(tokens));
+      const t = readTokens(tokens);
+      if (t === undefined) {
+        throw new ParseError("Invalid parens");
+      }
+      L.push(t);
     }
     tokens.shift();
     return L;
@@ -79,7 +83,14 @@ function ex(code, env) {
 }
 
 function q(code, env) {
-  const t = +new Date(), res = parse(code);
+  const t = +new Date();
+  try {
+    const res = parse(code);
+  } catch (e) {
+    console.error("parsing error", e, "when parsing code <" + code + ">");
+    return;
+  }
+
   env["start"] = () => t;
   commands.push([t, () => eval_(res, env)]);
 }
@@ -231,7 +242,6 @@ document.addEventListener("DOMContentLoaded", function(event) {
   //  "(; (translate 300 300) (font '48px sans-serif') (rotateRight (% (/ (t) 10) 365)) (fillText 'whoa dude' 0 0))",
   //  env()
   //);
-  //q("(; (font 24px", env());
 
   const proto = document.location.protocol.match(/(.):/)[1] == "s"
     ? "wss"
