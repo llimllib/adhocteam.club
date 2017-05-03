@@ -4,6 +4,7 @@ function tokenize(cmd) {
     .replace(new RegExp(/\)/, "g"), " ) ")
     .replace(new RegExp(/'/, "g"), " ' ")
     .replace(new RegExp(/"/, "g"), ' " ')
+    .replace(new RegExp(/\n/, "g"), " ")
     .split(" ")
     .filter(x => x.length > 0);
 }
@@ -236,10 +237,10 @@ document.addEventListener("DOMContentLoaded", function(event) {
     : "ws",
     conn = new WebSocket(`${proto}://${document.location.host}/ws`);
   conn.onclose = function(evt) {
-    console.log("closing");
+    console.log("closing websocket connection");
   };
   conn.onmessage = function(evt) {
-    console.log("got evt", evt);
+    //console.log("got evt", evt);
     q(evt.data, env());
   };
   conn.onerror = function(err) {
