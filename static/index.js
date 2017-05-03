@@ -19,9 +19,14 @@ function parse(data) {
   return readTokens(tokenize(data));
 }
 
+function ParseError(message) {
+  this.message = message;
+}
+
 function readTokens(tokens) {
   if (tokens.length == 0) return;
   const tok = tokens.shift();
+
   if ("(" == tok) {
     const L = [];
     while (tokens[0] != ")") {
@@ -34,6 +39,9 @@ function readTokens(tokens) {
   } else if ("'" == tok) {
     const string = [];
     while (tokens[0] != "'") {
+      if (tokens.length === 0) {
+        throw new ParseError("Invalid quotes");
+      }
       string.push(tokens.shift());
     }
     tokens.shift();
@@ -199,6 +207,10 @@ document.addEventListener("DOMContentLoaded", function(event) {
 
   // TODO: * test cross-domain URLs
   //       * possibly just accept a src to drawImage?
+  q(
+    "(; (translate 300 300) (font '48px sans-serif') (rotateRight (% (/ (t) 10) 365)) (fillText '<img src='https://media.giphy.com/media/gx54W1mSpeYMg/giphy.gif'>  10 0))",
+    e
+  );
   q("(drawImage /static/adhoc.png 10 100)", env());
   q("(drawImage https://billmill.org/images/logo.png (spinLeft 2) 100)", env());
   q(
