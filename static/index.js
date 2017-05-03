@@ -205,8 +205,6 @@ document.addEventListener("DOMContentLoaded", function(event) {
   c = ca.getContext("2d");
   e = env();
 
-  // TODO: * test cross-domain URLs
-  //       * possibly just accept a src to drawImage?
   q(
     "(; (translate 300 300) (font '48px sans-serif') (rotateRight (% (/ (t) 10) 365)) (fillText '<img src='https://media.giphy.com/media/gx54W1mSpeYMg/giphy.gif'>  10 0))",
     e
