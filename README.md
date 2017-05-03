@@ -15,7 +15,7 @@ or:
 
 or try to send the same sort of request with your favorite programming language. Or a new programming language! Look I'm not your boss.
 
-## langauge
+## language
 
 If you want to graffiti my talk (and you definitely do) you will need to use my terrible home grown presentation lisp.
 
