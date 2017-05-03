@@ -86,3 +86,7 @@ The effect of this will be that the word "bananas" will spin out across the canv
 
 For now, [read the source!](https://github.com/llimllib/adhocteam.club/blob/master/static/index.js#L130). I'll get around to
 officially documenting them probably never
+
+## architecture
+
+![](https://adhocteam.club/static/arch.jpg)
