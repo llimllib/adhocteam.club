@@ -156,8 +156,8 @@ document.addEventListener("DOMContentLoaded", function(event) {
       font: font => ctx.font = font,
       // We have to use the arrow function to get a proper "this", otherwise
       // we get an invalid context error
-      fillText: (text, x, y) => ctx.fillText(text, x, y),
-      strokeText: (text, x, y) => ctx.strokeText(text, x, y),
+      fillText: (text, x, y) => ctx.fillText(text, x || 100, y || 100),
+      strokeText: (text, x, y) => ctx.strokeText(text, x || 100, y || 100),
       clearRect: (x, y, width, height) => ctx.clearRect(x, y, width, height),
       fillRect: (x, y, width, height) => ctx.fillRect(x, y, width, height),
       fillStyle: fill => ctx.fillStyle = fill,
@@ -231,6 +231,7 @@ document.addEventListener("DOMContentLoaded", function(event) {
   //  "(; (translate 300 300) (font '48px sans-serif') (rotateRight (% (/ (t) 10) 365)) (fillText 'whoa dude' 0 0))",
   //  env()
   //);
+  //q("(; (font 24px", env());
 
   const proto = document.location.protocol.match(/(.):/)[1] == "s"
     ? "wss"
