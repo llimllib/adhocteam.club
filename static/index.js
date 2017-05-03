@@ -78,9 +78,9 @@ function ex(code, env) {
 }
 
 function q(code, env) {
-  const t = +new Date();
+  const t = +new Date(), res = parse(code);
   env["start"] = () => t;
-  commands.push([t, () => ex(code, env)]);
+  commands.push([t, () => eval_(res, env)]);
 }
 
 const commands = [], blurDuration = 10;
@@ -205,28 +205,31 @@ document.addEventListener("DOMContentLoaded", function(event) {
   c = ca.getContext("2d");
   e = env();
 
-  q(
-    "(; (translate 300 300) (font '48px sans-serif') (rotateRight (% (/ (t) 10) 365)) (fillText '<img src='https://media.giphy.com/media/gx54W1mSpeYMg/giphy.gif'>  10 0))",
-    e
-  );
-  q("(drawImage /static/adhoc.png 10 100)", env());
-  q("(drawImage https://billmill.org/images/logo.png (spinLeft 2) 100)", env());
-  q(
-    "(; (font '48px serif') (fillText 'bananas are a fine fruit' (spinLeft 3) (spinUp 3))))",
-    env()
-  );
-  q(
-    `(;
-    (fillRect 0 0 100 100) (fillRect 200 0 100 100) (fillRect 400 0 100 100) (fillRect 600 0 100 100)
-    (fillRect 0 200 100 100) (fillRect 200 200 100 100) (fillRect 400 200 100 100) (fillRect 600 200 100 100)
-    (fillRect 0 400 100 100) (fillRect 200 400 100 100) (fillRect 400 400 100 100) (fillRect 600 400 100 100)
-  )`,
-    env()
-  );
-  q(
-    "(; (translate 300 300) (font '48px sans-serif') (rotateRight (% (/ (t) 10) 365)) (fillText 'whoa dude' 0 0))",
-    env()
-  );
+  // an invalid example:
+  //q(
+  //  "(; (translate 300 300) (font '48px sans-serif') (rotateRight (% (/ (t) 10) 365)) (fillText '<img src='https://media.giphy.com/media/gx54W1mSpeYMg/giphy.gif'>  10 0))",
+  //  e
+  //);
+  //
+  // valid examples
+  //q("(drawImage /static/adhoc.png 10 100)", env());
+  //q("(drawImage https://billmill.org/images/logo.png (spinLeft 2) 100)", env());
+  //q(
+  //  "(; (font '48px serif') (fillText 'bananas are a fine fruit' (spinLeft 3) (spinUp 3))))",
+  //  env()
+  //);
+  //q(
+  //  `(;
+  //  (fillRect 0 0 100 100) (fillRect 200 0 100 100) (fillRect 400 0 100 100) (fillRect 600 0 100 100)
+  //  (fillRect 0 200 100 100) (fillRect 200 200 100 100) (fillRect 400 200 100 100) (fillRect 600 200 100 100)
+  //  (fillRect 0 400 100 100) (fillRect 200 400 100 100) (fillRect 400 400 100 100) (fillRect 600 400 100 100)
+  //)`,
+  //  env()
+  //);
+  //q(
+  //  "(; (translate 300 300) (font '48px sans-serif') (rotateRight (% (/ (t) 10) 365)) (fillText 'whoa dude' 0 0))",
+  //  env()
+  //);
 
   const proto = document.location.protocol.match(/(.):/)[1] == "s"
     ? "wss"
