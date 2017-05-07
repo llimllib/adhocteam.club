@@ -79,7 +79,7 @@ function eval_(expr, env) {
     const args = expr.slice(1).map(e => eval_(e, env));
     //console.log(proc, args);
     if (proc === undefined || typeof proc !== "function") {
-      throw new EvalError("illegal proc " + expr[0])
+      throw new EvalError(`illegal proc ${expr[0]} ${args}`);
     }
     return proc(...args);
   }
@@ -267,6 +267,23 @@ document.addEventListener("DOMContentLoaded", function(event) {
   //  "(; (translate 300 300) (font '48px sans-serif') (rotateRight (% (/ (t) 10) 365)) (fillText 'whoa dude' 0 0))",
   //  env()
   //);
+  //
+  // This website is abandoned, so leave it in a constant state of welcome I guess?
+  function welcome() {
+    for (let i=0; i < 15; i++) {
+      q(
+        `
+    (; (translate ${Math.floor(Math.random() * 1024)} ${Math.floor(Math.random() * 768)})
+       (font '48px serif')
+       (color 'red')
+       (rotateRight (% (/ (t) 15) 365))
+       (strokeText 'welcome' -20 -10))`,
+        env()
+      );
+    }
+  }
+  welcome();
+  setInterval(welcome, 1000*5);
 
   const proto = document.location.protocol.match(/(.):/)[1] == "s"
     ? "wss"
