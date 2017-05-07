@@ -24,6 +24,10 @@ function ParseError(message) {
   this.message = message;
 }
 
+function EvalError(message) {
+  this.message = message;
+}
+
 function readTokens(tokens) {
   if (tokens.length == 0) return;
   const tok = tokens.shift();
@@ -74,6 +78,9 @@ function eval_(expr, env) {
     const proc = eval_(expr[0], env);
     const args = expr.slice(1).map(e => eval_(e, env));
     //console.log(proc, args);
+    if (proc === undefined || typeof proc !== "function") {
+      throw new EvalError("illegal proc " + expr[0])
+    }
     return proc(...args);
   }
 }
@@ -84,8 +91,9 @@ function ex(code, env) {
 
 function q(code, env) {
   const t = +new Date();
+  let res;
   try {
-    const res = parse(code);
+    res = parse(code);
   } catch (e) {
     console.error("parsing error", e, "when parsing code <" + code + ">");
     return;
@@ -150,11 +158,13 @@ document.addEventListener("DOMContentLoaded", function(event) {
       sin: Math.sin,
       width: () => width,
       height: () => height,
-      drawImage: (src, x, y) => {
+      drawImage: (src, x, y, dw, dh) => {
         if (images.hasOwnProperty(src)) {
           // the image is undefined until it gets onload-ed
-          if (images[src] !== undefined) {
+          if (images[src] !== undefined && dw === undefined) {
             ctx.drawImage(images[src], x, y);
+          } else if (images[src] !== undefined) {
+            ctx.drawImage(images[src], x, y, dw, dh);
           }
         } else {
           const img = document.createElement("img");
@@ -171,7 +181,10 @@ document.addEventListener("DOMContentLoaded", function(event) {
       strokeText: (text, x, y) => ctx.strokeText(text, x || 100, y || 100),
       clearRect: (x, y, width, height) => ctx.clearRect(x, y, width, height),
       fillRect: (x, y, width, height) => ctx.fillRect(x, y, width, height),
-      fillStyle: fill => ctx.fillStyle = fill,
+      color: fill => {
+        ctx.fillStyle = fill;
+        ctx.strokeStyle = fill;
+      },
       strokeStyle: stroke => ctx.strokeStyle = stroke,
       strokeRect: (x, y, width, height) => ctx.strokeRect(x, y, width, height),
       log: s => console.log(s),
@@ -194,6 +207,18 @@ document.addEventListener("DOMContentLoaded", function(event) {
       },
       spinUp: s => {
         return height - +new Date() / speed[s] % height;
+      },
+      goLeft: s => {
+        return width - +new Date() / speed[s] % width * 2;
+      },
+      goRight: s => {
+        return +new Date() / speed[s] % width * 2;
+      },
+      goUp: s => {
+        return height - +new Date() / speed[s] % height * 2;
+      },
+      goDown: s => {
+        return +new Date() / speed[s] % height * 2;
       },
       rotateRight: degrees => {
         ctx.rotate(degrees * Math.PI / 180);

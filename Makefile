@@ -8,3 +8,6 @@ push: ateam
 
 ateam: main.go
 	GOOS=linux GOARCH=amd64 go build -o ateam main.go
+
+slides:
+	FLASK_APP=slides.py FLASK_DEBUG=1 flask run
