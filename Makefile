@@ -4,7 +4,7 @@
 push: ateam
 	chmod -R a+r static/
 	rsync -avuz ateam hubvan:/srv/adhocteam.club
-	rsync -avuz static/*.png static/*.jpg static/*.html static/*.js hubvan:/srv/adhocteam.club/static/
+	rsync -avuz static/*.png static/*.jpg static/*.html static/*.js static/*.mp3 hubvan:/srv/adhocteam.club/static/
 
 ateam: main.go
 	GOOS=linux GOARCH=amd64 go build -o ateam main.go
