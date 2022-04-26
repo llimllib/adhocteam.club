@@ -3,7 +3,11 @@
 
 adhocteam.club is a presentation server that encourages the viewers of a presentation to add graffiti to it in real time.
 
-## Do it!
+## Run the graffiti server
+
+`go run main.go` will open up a graffiti server on http://localhost:8080
+
+## Draw on it
 
 To graffiti the current presentation, run:
 
@@ -90,3 +94,11 @@ officially documenting them probably never
 ## architecture
 
 ![](https://adhocteam.club/static/arch.jpg)
+
+
+## slides
+
+To run the slides for the talk I gave that there is no recording of, have flask
+installed (`pip install flask`) and run: `FLASK_APP=slides flask run` That will
+open a server up on http://localhost:5000, and clicking on the slide names will
+start them on the graffiti server
